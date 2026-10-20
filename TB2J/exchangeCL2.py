@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from TB2J.external import p_imap
 from TB2J.green import TBGreen
+from TB2J.resume_cache import ResumeCache
 from TB2J.io_exchange import SpinIO
 
 from .exchange import ExchangeCL
@@ -423,23 +424,55 @@ class ExchangeCL2(ExchangeCL):
     def calculate_all(self):
         """
         The top level.
+
+        If self.resume is set (--resume), already-computed energy-contour
+        points are loaded from an on-disk cache (TB2J.resume_cache) instead
+        of recomputed, and every newly-computed point is saved to that
+        cache as soon as it is available -- so a run killed partway
+        through (OOM, walltime, ...) can be resumed by rerunning with
+        --resume instead of starting the whole exchange calculation over.
         """
         print("Green's function Calculation started.")
 
         npole = len(self.contour.path)
         weights = self.contour.weights
 
+        cache = ResumeCache(self.output_path, self) if getattr(self, "resume", False) else None
+
+        results = [None] * npole
+        pending_idx = []
+        for i in range(npole):
+            if cache is not None and cache.has(i):
+                loaded = cache.load(i, self.contour.path[i])
+                if loaded is not None:
+                    results[i] = loaded
+                    continue
+            pending_idx.append(i)
+
+        if cache is not None and 0 < len(pending_idx) < npole:
+            print(
+                f"Resuming: {npole - len(pending_idx)}/{npole} energy points already "
+                f"cached, computing the remaining {len(pending_idx)}."
+            )
+
+        pending_path = [self.contour.path[i] for i in pending_idx]
+
         if self.nproc == 1:
-            results = (
+            pending_results = (
                 self.get_quantities_per_e(e)
-                for e in tqdm(self.contour.path, total=npole)
+                for e in tqdm(pending_path, total=len(pending_path))
             )
         else:
             # pool = ProcessPool(nodes=self.nproc)
             # results = pool.map(self.get_AijR_rhoR ,self.contour.path)
-            results = p_imap(
-                self.get_quantities_per_e, self.contour.path, num_cpus=self.nproc
+            pending_results = p_imap(
+                self.get_quantities_per_e, pending_path, num_cpus=self.nproc
             )
+
+        for idx, result in zip(pending_idx, pending_results):
+            results[idx] = result
+            if cache is not None:
+                cache.save(idx, self.contour.path[idx], result)
 
         for i, result in enumerate(results):
             w = weights[i]
@@ -467,6 +500,10 @@ class ExchangeCL2(ExchangeCL):
         self.compute_charge_and_magnetic_moments()
 
         self.A_to_Jtensor()
+
+        if getattr(self, "resume", False):
+            # Full success: the per-energy-point cache is no longer needed.
+            ResumeCache(self.output_path, self).clear()
 
     def write_output(self, path="TB2J_results"):
         self._prepare_index_spin()

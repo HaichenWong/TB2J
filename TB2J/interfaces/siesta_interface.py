@@ -79,6 +79,7 @@ def gen_exchange_siesta(
         ne=None,
         nproc=1,
         use_cache=False,
+        resume=False,
         output_path="TB2J_results",
         orb_decomposition=False,
         orth=False,
