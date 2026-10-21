@@ -14,7 +14,9 @@ def run_siesta2J():
     )
     # Add siesta specific arguments
     parser.add_argument(
-        "--fdf_fname", help="path of the input fdf file", default="./", type=str
+        "--fdf_fname",
+        "--fdf-fname",
+        help="path of the input fdf file", default="./", type=str
     )
     parser.add_argument(
         "--fname",
@@ -24,6 +26,7 @@ def run_siesta2J():
     )
     parser.add_argument(
         "--split_soc",
+        "--split-soc",
         help="whether the SOC part of the Hamiltonian can be read from the output of siesta. Default: False",
         action="store_true",
         default=False,

@@ -240,6 +240,7 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--exclude_orbs",
+        "--exclude-orbs",
         help="the indices of wannier functions to be excluded from magnetic site. counting start from 0",
         default=[],
         type=int,
@@ -255,6 +256,7 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument(
         "--use_cache",
+        "--use-cache",
         help="whether to use disk file for temporary storing wavefunctions and hamiltonian to reduce memory usage. Default: False",
         action="store_true",
         default=False,
@@ -280,6 +282,7 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument(
         "--orb_decomposition",
+        "--orb-decomposition",
         default=False,
         action="store_true",
         help="whether to do orbital decomposition in the non-collinear mode.",
@@ -287,6 +290,7 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument(
         "--group_by_zeta",
+        "--group-by-zeta",
         default=False,
         action="store_true",
         help="Retain per-zeta orbital contributions instead of summing over radial zeta. Only affects LCAO backends (SIESTA/ABACUS).",
@@ -294,12 +298,14 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument(
         "--output_path",
+        "--output-path",
         help="The path of the output directory, default is TB2J_results",
         type=str,
         default="TB2J_results",
     )
     parser.add_argument(
         "--write_dm",
+        "--write-dm",
         help="whether to write density matrix",
         action="store_true",
         default=False,
@@ -321,6 +327,7 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument(
         "--mae_angles",
+        "--mae-angles",
         help="angles for computing MAE, default is 0 0 0",
         type=float,
         nargs="*",
@@ -328,6 +335,7 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--index_magnetic_atoms",
+        "--index-magnetic-atoms",
         help="index of magnetic atoms in the unit cell, default is None. If specified, this will be used to determine the atoms to be considered as magnetic atoms, instead of determined from magnetic elements. Note that the index starts from 1 ",
         type=int,
         nargs="*",
@@ -335,18 +343,21 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--use_gpu",
+        "--use-gpu",
         help="Whether to use GPU acceleration (requires JAX). Default is True if JAX/CUDA is found.",
         action="store_true",
         default=None,
     )
     parser.add_argument(
         "--vectorize_energy",
+        "--vectorize-energy",
         help="Whether to vectorize over the entire energy contour on GPU. Default: False",
         action="store_true",
         default=False,
     )
     parser.add_argument(
         "--e_batch_size",
+        "--e-batch-size",
         help="Batch size for energy points on GPU. Default: None",
         type=int,
         default=None,
