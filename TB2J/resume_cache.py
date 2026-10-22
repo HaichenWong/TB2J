@@ -17,6 +17,7 @@ import json
 import os
 import pickle
 import shutil
+import time
 
 CACHE_SUBDIR = ".tb2j_resume_cache"
 
@@ -79,6 +80,12 @@ class ResumeCache:
         os.makedirs(self.dir, exist_ok=True)
         self._sigfile = os.path.join(self.dir, "signature.json")
         self._check_or_reset_signature(_signature_payload(exchange))
+        # Wall-clock timing of newly computed points in *this* process, so a
+        # killed-and-resumed run gives real per-point/throughput numbers to
+        # size the next job's requested walltime by, instead of a guess.
+        self._timing_log = os.path.join(self.dir, "timing.log")
+        self._t_start = time.time()
+        self._t_last = self._t_start
 
     def _check_or_reset_signature(self, payload):
         digest = hashlib.sha256(
@@ -131,6 +138,24 @@ class ResumeCache:
         with open(tmp, "wb") as f:
             pickle.dump({"e": e, "result": result}, f)
         os.replace(tmp, path)
+        self._log_timing(idx)
+
+    def _log_timing(self, idx):
+        """Append one line to <cache_dir>/timing.log and print it: how long
+        (wall clock) since this process started computing new points, and
+        since the previous point was saved. Only newly computed points are
+        logged (a point loaded straight from cache doesn't call save()), so
+        this is real per-job throughput, not stale history from an earlier
+        attempt.
+        """
+        now = time.time()
+        since_start = now - self._t_start
+        since_last = now - self._t_last
+        self._t_last = now
+        line = f"point {idx:5d}  +{since_last:8.2f}s since previous  {since_start:10.2f}s since this process started\n"
+        print(f"[resume cache] {line.strip()}")
+        with open(self._timing_log, "a") as f:
+            f.write(line)
 
     def clear(self):
         """Remove the whole cache (called after a fully successful run)."""
