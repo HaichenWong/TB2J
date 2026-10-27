@@ -68,6 +68,7 @@ def run_siesta2J():
         description=args.description,
         output_path=args.output_path,
         use_cache=args.use_cache,
+        cache_path=args.cache_path,
         resume=args.resume,
         nproc=args.np,
         exclude_orbs=args.exclude_orbs,

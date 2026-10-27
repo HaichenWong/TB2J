@@ -29,6 +29,7 @@ class ExchangeCL2(ExchangeCL):
             kmesh=self.kmesh,
             efermi=self.efermi,
             use_cache=self._use_cache,
+            cache_path=self._cache_path,
             nproc=self.nproc,
             smearing_width=self.smearing,
         )
@@ -37,6 +38,7 @@ class ExchangeCL2(ExchangeCL):
             kmesh=self.kmesh,
             efermi=self.efermi,
             use_cache=self._use_cache,
+            cache_path=self._cache_path,
             nproc=self.nproc,
             smearing_width=self.smearing,
         )

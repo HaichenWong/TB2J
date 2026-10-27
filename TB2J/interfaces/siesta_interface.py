@@ -57,6 +57,9 @@ def gen_exchange_siesta(
             The number of processors for the calculation. Default is 1.
         use_cache: bool
             Whether to use the cache for the calculation. Default is False.
+        cache_path: str
+            Directory for the --use-cache wavefunction/Hamiltonian disk spill. If
+            None, falls back to $TMPDIR or /dev/shm/TB2J_cache. Default is None.
         output_path: str
             The output path for the calculation. Default is "TB2J_results".
         orb_decomposition: bool
@@ -79,6 +82,7 @@ def gen_exchange_siesta(
         ne=None,
         nproc=1,
         use_cache=False,
+        cache_path=None,
         resume=False,
         output_path="TB2J_results",
         orb_decomposition=False,

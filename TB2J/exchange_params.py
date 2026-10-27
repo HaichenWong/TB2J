@@ -25,6 +25,7 @@ class ExchangeParams:
     ne: int = 0
     Rcut: float = None
     _use_cache: bool = False
+    _cache_path: str = None
     resume: bool = False
     nproc: int = 1
     description: str = ""
@@ -58,6 +59,7 @@ class ExchangeParams:
         ne=None,
         Rcut=None,
         use_cache=False,
+        cache_path=None,
         resume=False,
         nproc=1,
         description="",
@@ -111,6 +113,7 @@ class ExchangeParams:
         self.ne = ne
         self.Rcut = Rcut
         self._use_cache = use_cache
+        self._cache_path = cache_path
         self.resume = resume
         self.nproc = nproc
         self.description = description
@@ -263,6 +266,19 @@ def add_exchange_args_to_parser(parser: argparse.ArgumentParser):
     )
 
     parser.add_argument(
+        "--cache_path",
+        "--cache-path",
+        help="directory to use for the --use-cache wavefunction/Hamiltonian disk spill "
+             "(a fresh subdirectory is created inside it per run and removed on success). "
+             "If not given, falls back to $TMPDIR or /dev/shm/TB2J_cache -- which on a "
+             "cluster is typically node-local disk, so a killed run's spill files are "
+             "left behind on that node until something else cleans them up. Pass this "
+             "explicitly to use a shared filesystem (e.g. scratch or home) instead.",
+        default=None,
+        type=str,
+    )
+
+    parser.add_argument(
         "--resume",
         help="whether to resume a previous (killed/incomplete) run of this exact calculation, "
              "reusing already-computed energy-contour points cached under "
@@ -397,6 +413,7 @@ def parser_argument_to_dict(args) -> dict:
         "ne": args.ne,
         "Rcut": args.rcut,
         "use_cache": args.use_cache,
+        "cache_path": args.cache_path,
         "resume": args.resume,
         "nproc": args.np,
         "description": args.description,
